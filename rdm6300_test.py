@@ -1,32 +1,27 @@
 import serial
-import time
 
 ser = serial.Serial('/dev/serial0')
 
-print(ser)
+'''
+principles: 
+    - try keep in sync with 14-byte frames from module, and read per frame
+    - 
+'''
 
-print('TODO: find and use the start and stop characters')
-print('TODO: keep the raw reading/analysis code as well, with isascii or whatever')
 
-# i hope this is emptying any buffer in serial:
-ser.read_all()
+def sync():
+    ser.read_until(b'\x03')
 
-mybytes = bytes()
+
+sync()
+
 while True:
-    b = ser.read()
-    t = time.time_ns()
-    print('SOMETHING HAPPENED')
-    rest=[]
-    rest.clear()
-    for i in range(7):
-        time.sleep(0.1)
-        rest.append( ser.read_all() )
-    print('rest sizes:', [len(r) for r in rest])
-    mybytes = b
-    for r in rest:
-        mybytes+=r
-    print(mybytes.hex())
-    print('    ',mybytes.decode())
-    print('    ',str(mybytes.decode()))
+    frame = ser.read(14)
+    if not frame[0] == 2:
+        raise Exception('no 2 at index 0; mmm thought that sync would have avoided this')
+    if not frame[13] == 3:
+        raise Exception('no 3 at index 13; mmm thought that sync would have avoided this')
+    data=frame[1:13]
+    print(data)
 
 

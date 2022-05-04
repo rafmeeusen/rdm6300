@@ -60,13 +60,21 @@ class RfidDataTimeKeeper:
 def sync():
     ser.read_until(b'\x03')
 
+def exor_check(data):
+    if not len(data) == 12:
+        raise Exception('mmm thought that my program would always give 12 bytes here')
+    calc_xor = int(data[0:2],16) ^ int(data[2:4],16) ^ int(data[4:6],16) ^ int(data[6:8],16) ^ int(data[8:10],16)
+    given_xor = int(data[10:12],16)
+    return calc_xor == given_xor
+
 # warning: fun raises exceptions for now
-def checkdata(data):
+def checkformat(data):
+    if not len(data) == 14:
+        raise Exception('mmm thought that serial port reading would always give 14 bytes')
     if not frame[0] == 2:
         raise Exception('no 2 at index 0; mmm thought that sync would have avoided this')
     if not frame[13] == 3:
         raise Exception('no 3 at index 13; mmm thought that sync would have avoided this')
-    #todo : crc check
     return True
 
 
@@ -76,14 +84,17 @@ keeper = RfidDataTimeKeeper()
 while True:
     frame = ser.read(14)
     ts = time.time()
-    if not checkdata(frame):
+    if not checkformat(frame):
         continue
 
     data_crc=frame[1:13]
-    data=frame[1:11]
+    if not exor_check(data_crc):
+        print('checksum error:', data_crc) 
+        continue
 
+    data=frame[1:11]
     keeper.adddata(data, ts)
     if keeper.wasnew():
         print(data)
-        
+
 

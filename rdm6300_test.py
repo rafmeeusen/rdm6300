@@ -35,6 +35,7 @@ class RfidDataTimeKeeper:
         self.newtime = None
         self.newdata = None
         self.EXPECTED_DELTA_TIME=0.0662
+        self.TIME_OUT=0.6
     def adddata(self, data, time):
         # shift previous new to previous
         self.prevdata = self.newdata
@@ -49,7 +50,7 @@ class RfidDataTimeKeeper:
         else:
             # we have at least 2 frames and 2 times
             deltat = self.newtime - self.prevtime
-            if deltat > (1.1 * self.EXPECTED_DELTA_TIME):
+            if deltat > self.TIME_OUT:
                 return True
             if self.newdata != self.prevdata:
                 return True

@@ -95,6 +95,7 @@ while True:
     data=frame[1:11]
     keeper.adddata(data, ts)
     if keeper.wasnew():
-        print(data)
+        data_str = data.decode()
+        print(data_str)
 
 

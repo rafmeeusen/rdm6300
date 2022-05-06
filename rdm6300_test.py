@@ -79,23 +79,26 @@ def checkformat(data):
 
 
 # init:
-sync()
-keeper = RfidDataTimeKeeper()
-while True:
-    frame = ser.read(14)
-    ts = time.time()
-    if not checkformat(frame):
-        continue
+try:
+    sync()
+    keeper = RfidDataTimeKeeper()
+    while True:
+        frame = ser.read(14)
+        ts = time.time()
+        if not checkformat(frame):
+            continue
 
-    data_crc=frame[1:13]
-    if not exor_check(data_crc):
-        print('checksum error:', data_crc) 
-        continue
+        data_crc=frame[1:13]
+        if not exor_check(data_crc):
+            print('checksum error:', data_crc) 
+            continue
 
-    data=frame[1:11]
-    keeper.adddata(data, ts)
-    if keeper.wasnew():
-        data_str = data.decode()
-        print(data_str)
+        data=frame[1:11]
+        keeper.adddata(data, ts)
+        if keeper.wasnew():
+            data_str = data.decode()
+            print(data_str)
+except KeyboardInterrupt:
+    print('\n') 
 
 
